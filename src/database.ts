@@ -11,42 +11,58 @@ export interface DatabaseIF {
 interface DatabaseInternalIF {
 	SET(name: string, value: string) : void;
 	GET(name: string) : void;
+	get(name: string) : string;
 	UNSET(name: string) : void;
 	NUMEQUALTO(value: string) : void;
+	numEqualTo(value: string) : number;
 	BEGIN() : void;
 	ROLLBACK(): void;
 	COMMIT(): void;
 
-	getInternal(name: string, checkTransactions: boolean) : void;
 };
 
 class Transaction implements DatabaseInternalIF {
 	private readonly modifications = new Map<string, string | null>();
+	private readonly valueMods = new Map<string, number>();
 
 	constructor(private database: DatabaseInternalIF) {}
 
 	SET(name: string, value: string) : void {
 		this.modifications.set(name, value);
+		this.valueMods.set(name, 1 + (this.valueMods.get(name) ?? 0));
 	}
 
 	GET(name: string) : void {
-		this.getInternal(name, false);
+		console.log(this.get(name));
 	}
 
-	getInternal(name: string, checkTransactions: boolean): void {
+	get(name: string): string {
 		if(this.modifications.has(name)) {
-			console.log(this.modifications.get(name) ?? 'NULL');
+			return this.modifications.get(name) ?? 'NULL';
 		} else {
-			this.database.getInternal(name, false);
+			return this.database.get(name);
 		}
 	}
 
 	UNSET(name: string) : void {
+		if(this.modifications.has(name) && this.modifications.get(name) !== null) {
+			const value = this.modifications.get(name) ?? ''; //It wont ever be undefined
+			this.valueMods.set(value, -1 + (this.valueMods.get(value) ??  0));
+		} else if(this.database.get(name)) {
+			const value = this.database.get(name);
+			this.valueMods.set(value, -1 + (this.valueMods.get(value) ??  0));
+		}
+
 		this.modifications.set(name, null);
 	}
 
 	NUMEQUALTO(value: string) : void {
+		console.log(this.numEqualTo(value));
+	}
 
+	numEqualTo(value: string) : number {
+		const valueMod = this.valueMods.get(value) ?? 0;
+		return this.database.numEqualTo(value) + valueMod;
 	}
 
 	BEGIN() : void {
@@ -85,15 +101,15 @@ class Database implements DatabaseInternalIF
 	}
 
 	GET(name: string) : void {
-		this.getInternal(name, true);
-	}
-
-	getInternal(name: string, checkTransactions: boolean = true) : void {
-		if(checkTransactions && this.tryLastTransaction('GET', name)) {
+		if(this.tryLastTransaction('GET', name)) {
 			return;
 		}
 
-		console.log(this.keyValueMap.get(name) ?? 'NULL');
+		console.log(this.get(name));
+	}
+
+	get(name: string) : string {
+		return this.keyValueMap.get(name) ?? 'NULL';
 	}
 
 	UNSET(name: string) : void {
@@ -120,7 +136,11 @@ class Database implements DatabaseInternalIF
 			return;
 		}
 
-		console.log(this.valueKeyMap.get(value) ?? 0);
+		console.log(this.numEqualTo(value));
+	}
+
+	numEqualTo(value: string) : number {
+		return this.valueKeyMap.get(value) ?? 0;
 	}
 
 	BEGIN() {

@@ -83,8 +83,22 @@ export class TestConsole implements IConsoleIF {
 		'END',
 	];
 
+	readonly COMMANDS7 = [
+		'SET a 10',
+		'BEGIN',
+		'NUMEQUALTO 10',
+		'BEGIN',
+		'UNSET a',
+		'NUMEQUALTO 10',
+		'ROLLBACK',
+		'NUMEQUALTO 10',
+		'COMMIT',
+		'NUMEQUALTO 10',
+		'END',
+	];
+
 	readline(): string {
-		return this.COMMANDS6.splice(0, 1)[0];
+		return this.COMMANDS7.splice(0, 1)[0];
 	}
 }
 
