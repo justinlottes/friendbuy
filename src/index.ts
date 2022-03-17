@@ -1,7 +1,8 @@
-import { IConsole, IConsoleIF } from './iconsole';
+import { IConsole, IConsoleIF, TestConsole } from './iconsole';
 import { parseCommand, CommandIF } from './command';
 
-const iconsole = new IConsole();
+//const iconsole = new IConsole();
+const iconsole = new TestConsole();
 while(true) {
 	const commandStr = iconsole.readline();
 	const command = parseCommand(commandStr);
