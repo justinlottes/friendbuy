@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "ts-node-dev ./src/index.ts",
-		"copy-data": "cp -r data dist/data",
+    "copy-data": "cp -r data dist/data",
     "build": "rm -fr dist/ && tsc"
   },
   "author": "TruLotus",
@@ -18,9 +18,11 @@
     "eslint": "^7.32.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.25.2",
+    "@types/readline-sync": "^1.4.4",
     "ts-node-dev": "^1.1.8",
     "typescript": "^4.5.5"
   },
   "dependencies": {
+    "readline-sync": "^1.4.10"
   }
 }
