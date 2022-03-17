@@ -12,6 +12,8 @@ class Database implements DatabaseIF
 	private readonly valueKeyMap = new Map<string, number>();
 
 	SET(name: string, value: string) : void {
+		this.UNSET(name);
+
 		this.keyValueMap.set(name, value);
 		this.valueKeyMap.set(value, 1 + (this.valueKeyMap.get(value) ?? 0));
 	}
@@ -22,9 +24,11 @@ class Database implements DatabaseIF
 
 	UNSET(name: string) : void {
 		const value = this.keyValueMap.get(name);
+
 		if(value !== undefined) {
 			this.keyValueMap.delete(name);
-			const count = this.valueKeyMap.get(value) ?? 0 - 1;//This wont ever be undefined
+			const count = (this.valueKeyMap.get(value) ?? 0) - 1;//This wont ever be undefined
+
 			if(count == 0) {
 				this.valueKeyMap.delete(value);
 			} else {

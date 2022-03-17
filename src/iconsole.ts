@@ -11,7 +11,7 @@ export class IConsole implements IConsoleIF {
 }
 
 export class TestConsole implements IConsoleIF {
-	readonly COMMANDS = [
+	readonly COMMANDS1 = [
 		'SET x 10',
 		'GET x',
 		'UNSET x',
@@ -19,9 +19,19 @@ export class TestConsole implements IConsoleIF {
 		'END',
 	];
 
+	readonly COMMANDS2 = [
+		'SET a 10',
+		'SET b 10',
+		'NUMEQUALTO 10',
+		'NUMEQUALTO 20',
+		'SET b 30',
+		'NUMEQUALTO 10',
+		'END',
+	];
+
 
 	readline(): string {
-		return this.COMMANDS.splice(0, 1)[0];
+		return this.COMMANDS2.splice(0, 1)[0];
 	}
 }
 
