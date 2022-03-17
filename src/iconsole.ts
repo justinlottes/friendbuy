@@ -29,9 +29,62 @@ export class TestConsole implements IConsoleIF {
 		'END',
 	];
 
+	readonly COMMANDS3 = [
+		'BEGIN',
+		'SET a 10',
+		'GET a',
+		'BEGIN',
+		'SET a 20',
+		'GET a',
+		'ROLLBACK',
+		'GET a',
+		'ROLLBACK',
+		'GET a',
+		'END',
+	];
+
+	readonly COMMANDS4 = [
+		'BEGIN',
+		'SET a 30',
+		'BEGIN',
+		'SET a 40',
+		'COMMIT',
+		'GET a',
+		'ROLLBACK',
+		'ROLLBACK',
+		'END',
+	]
+
+	readonly COMMANDS5 = [
+		'SET a 50',
+		'BEGIN',
+		'GET a',
+		'SET a 60',
+		'BEGIN',
+		'UNSET a',
+		'GET a',
+		'ROLLBACK',
+		'GET a',
+		'COMMIT',
+		'GET a',
+		'END',
+	];
+
+	readonly COMMANDS6 = [
+		'SET a 10',
+		'BEGIN',
+		'NUMEQUALTO 10',
+		'BEGIN',
+		'UNSET a',
+		'NUMEQUALTO 10',
+		'ROLLBACK',
+		'NUMEQUALTO 10',
+		'COMMIT',
+		'END',
+	];
 
 	readline(): string {
-		return this.COMMANDS2.splice(0, 1)[0];
+		return this.COMMANDS6.splice(0, 1)[0];
 	}
 }
 

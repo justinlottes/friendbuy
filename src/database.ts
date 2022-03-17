@@ -1,17 +1,83 @@
-interface DatabaseIF {
+export interface DatabaseIF {
 	SET(name: string, value: string) : void;
 	GET(name: string) : void;
 	UNSET(name: string) : void;
 	NUMEQUALTO(value: string) : void;
+	BEGIN() : void;
+	ROLLBACK(): void;
+	COMMIT(): void;
+};
+
+interface DatabaseInternalIF {
+	SET(name: string, value: string) : void;
+	GET(name: string) : void;
+	UNSET(name: string) : void;
+	NUMEQUALTO(value: string) : void;
+	BEGIN() : void;
+	ROLLBACK(): void;
+	COMMIT(): void;
+
+	getInternal(name: string, checkTransactions: boolean) : void;
+};
+
+class Transaction implements DatabaseInternalIF {
+	private readonly modifications = new Map<string, string | null>();
+
+	constructor(private database: DatabaseInternalIF) {}
+
+	SET(name: string, value: string) : void {
+		this.modifications.set(name, value);
+	}
+
+	GET(name: string) : void {
+		this.getInternal(name, false);
+	}
+
+	getInternal(name: string, checkTransactions: boolean): void {
+		if(this.modifications.has(name)) {
+			console.log(this.modifications.get(name) ?? 'NULL');
+		} else {
+			this.database.getInternal(name, false);
+		}
+	}
+
+	UNSET(name: string) : void {
+		this.modifications.set(name, null);
+	}
+
+	NUMEQUALTO(value: string) : void {
+
+	}
+
+	BEGIN() : void {
+	}
+
+	ROLLBACK(): void {
+	}
+
+	COMMIT(): void {
+		for(let entry of this.modifications.entries()) {
+			if(entry[1] === null) {
+				this.database.UNSET(entry[0]);
+			} else {
+				this.database.SET(entry[0], entry[1]);
+			}
+		};
+	}
 };
 
 //TODO - have a better mapping function so names can be pretty
-class Database implements DatabaseIF
+class Database implements DatabaseInternalIF
 {
 	private readonly keyValueMap = new Map<string, string>();
 	private readonly valueKeyMap = new Map<string, number>();
+	private readonly transactions: Transaction[] = [];
 
 	SET(name: string, value: string) : void {
+		if(this.tryLastTransaction('SET', name, value)) {
+			return;
+		}
+
 		this.UNSET(name);
 
 		this.keyValueMap.set(name, value);
@@ -19,10 +85,22 @@ class Database implements DatabaseIF
 	}
 
 	GET(name: string) : void {
+		this.getInternal(name, true);
+	}
+
+	getInternal(name: string, checkTransactions: boolean = true) : void {
+		if(checkTransactions && this.tryLastTransaction('GET', name)) {
+			return;
+		}
+
 		console.log(this.keyValueMap.get(name) ?? 'NULL');
 	}
 
 	UNSET(name: string) : void {
+		if(this.tryLastTransaction('UNSET', name)) {
+			return;
+		}
+
 		const value = this.keyValueMap.get(name);
 
 		if(value !== undefined) {
@@ -38,19 +116,45 @@ class Database implements DatabaseIF
 	}
 
 	NUMEQUALTO(value: string) : void {
+		if(this.tryLastTransaction('NUMEQUALTO', value)) {
+			return;
+		}
+
 		console.log(this.valueKeyMap.get(value) ?? 0);
 	}
 
 	BEGIN() {
-		console.log('begin');
+		if(this.transactions.length === 0) {
+			this.transactions.push(new Transaction(this));
+		} else {
+			this.transactions.push(new Transaction(this.transactions[this.transactions.length - 1]));
+		}
 	}
 
 	ROLLBACK() {
-		console.log('rollback');
+		if(this.transactions.length > 0) {
+			this.transactions.pop();
+		} else {
+			console.log('NO TRANSACTION');
+		}
 	}
 
 	COMMIT() {
-		console.log('commit');
+		if(this.transactions.length > 0) {
+			this.transactions.pop()?.COMMIT();
+		} else {
+			console.log('NO TRANSACTION');
+		}
+	}
+
+	private tryLastTransaction(operation: string, ...args: any[]) {
+		if(this.transactions.length > 0) {
+			const tx = this.transactions[this.transactions.length - 1] as any;
+			tx[operation].apply(tx, args);
+			return true;
+		}
+
+		return false;
 	}
 };
 
