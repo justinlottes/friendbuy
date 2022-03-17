@@ -161,7 +161,9 @@ class Database implements DatabaseInternalIF
 
 	COMMIT() {
 		if(this.transactions.length > 0) {
-			this.transactions.pop()?.COMMIT();
+			while(this.transactions.length > 0) {
+				this.transactions.pop()?.COMMIT();
+			}
 		} else {
 			console.log('NO TRANSACTION');
 		}

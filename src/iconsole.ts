@@ -51,7 +51,6 @@ export class TestConsole implements IConsoleIF {
 		'COMMIT',
 		'GET a',
 		'ROLLBACK',
-		'ROLLBACK',
 		'END',
 	]
 
