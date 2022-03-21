@@ -96,7 +96,14 @@ export class TestConsole implements IConsoleIF {
 		'END',
 	];
 
+	constructor(private commands?: string) {
+	}
+
 	readline(): string {
+		if(this.commands) {
+			return (this as any)[this.commands].splice(0, 1)[0];
+		}
+
 		return this.COMMANDS7.splice(0, 1)[0];
 	}
 }
